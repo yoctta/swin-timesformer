@@ -156,17 +156,7 @@ class SwinBlock(nn.Module):
 
 
 def shift(x,offset):
-    B,T,H,W,D=x.shape
-    x=rearrange(x,'b t h w d -> b (t h w) d')
-    Z=repeat(torch.arange(T,device=x.device),'a -> a H W',H=H,W=W)
-    X=repeat(torch.arange(H,device=x.device),'a -> T a W',T=T,W=W)
-    Y=repeat(torch.arange(W,device=x.device),'a -> T H a',T=T,H=H)
-    Z=(Z+offset[0])%T
-    X=(X+offset[1])%H
-    Y=(Y+offset[2])%W
-    TXY=(Z*H*W+X*W+Y).view(-1)
-    x=x.index_select(1,TXY)
-    x=rearrange(x,'b (t h w) d -> b t h w d',t=T,h=H,w=W)
+    x=torch.roll(x,offset,(1,2,3))
     return x
 
 def pad(x,time_M,space_M):
